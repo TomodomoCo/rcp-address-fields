@@ -57,7 +57,7 @@ function rcpaf_get_field_label( $field_slug ) {
  * @return array
  */
 function rcpaf_get_field_data( $field_slug, $user_id ) {
-	$data = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
+	$data  = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
 	$label = rcpaf_get_field_label( $field_slug );
 
 	// @todo: build in type of field (text, select)
@@ -74,20 +74,28 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
  * @param int   $user_id
  * @return array
  */
-function rcpaf_add_user_fields( $user_id = null ) {
-	if ( is_null( $user_id ) ) {
-		$user_id = get_current_user_id();
-	}
-
-	// Retrieve field data
+function rcpaf_get_all_fields_data( $user_id ) {
 	$address_1 = rcpaf_get_field_data( 'address_1', $user_id );
 	$address_2 = rcpaf_get_field_data( 'address_2', $user_id );
 	$city      = rcpaf_get_field_data( 'city', $user_id );
 	$state     = rcpaf_get_field_data( 'state', $user_id );
 	$country   = rcpaf_get_field_data( 'country', $user_id );
 
-	// Loop over fields for output: slug, label data
-	$fields   = [ $address_1, $address_2, $city, $state, $country ];
+	return [ $address_1, $address_2, $city, $state, $country ];
+}
+
+/**
+ * Print address fields to the registration form and profile editor
+ *
+ * @param string|null   $user_id
+ */
+function rcpaf_add_user_fields( $user_id = null ) {
+	if ( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
+
+	// Retrieve all the address fields
+	$fields   = rcpaf_get_all_fields_data( $user_id );
 	$template = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
 
 	foreach ( $fields as $field ) {
@@ -96,3 +104,31 @@ function rcpaf_add_user_fields( $user_id = null ) {
 }
 add_action( 'rcp_before_subscription_form_fields', 'rcpaf_add_user_fields' );
 add_action( 'rcp_profile_editor_after', 'rcpaf_add_user_fields' );
+
+/**
+ * Print address fields to the member edit screen
+ *
+ * @param int|null  $user_id
+ */
+function rcpaf_add_member_edit_fields( $user_id = null ) {
+	if ( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
+
+	$fields = rcpaf_get_all_fields_data( $user_id );
+
+	// @todo: build in support for select menus
+	foreach ( $fields as $field ): ?>
+		<tr valign="top">
+			<th scope="row" valign="top">
+				<label for="rcp_<?php echo $field['slug']; ?>">
+					<?php echo $field['label']; ?>
+				</label>
+			</th>
+			<td>
+				<input name="rcp_<?php echo $field['slug']; ?>" id="rcp_<?php echo $field['slug']; ?>" type="text" value="<?php echo esc_attr( $field['data'] ); ?>">
+			</td>
+		</tr>
+	<?php endforeach;
+}
+add_action( 'rcp_edit_member_after', 'rcpaf_add_member_edit_fields' );
