@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Returns the absolute path of the WordPress plugins directory
  *
+ * @todo: test on multisite to ensure paths still work
  * @return string   $path
  */
 function rcpaf_get_plugins_path() {

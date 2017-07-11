@@ -48,6 +48,14 @@ function rcpaf_get_field_label( $field_slug ) {
 	}
 }
 
+/**
+ * Fetches a field's label and any saved data for the current user
+ *
+ * @param string    $field_slug
+ * @param int       $user_id
+ *
+ * @return array
+ */
 function rcpaf_get_field_data( $field_slug, $user_id ) {
 	$data = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
 	$label = rcpaf_get_field_label( $field_slug );
@@ -61,9 +69,10 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
 }
 
 /**
- * Adds the custom fields to the registration form and profile editor
+ * Returns the all user address fields data
  *
- * @param string|null   $user_id
+ * @param int   $user_id
+ * @return array
  */
 function rcpaf_add_user_fields( $user_id = null ) {
 	if ( is_null( $user_id ) ) {
