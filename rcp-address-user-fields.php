@@ -133,3 +133,30 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 }
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields_admin' );
 
+/**
+ * Validates address fields during registration
+ *
+ * @param array     $posted_data
+ */
+function rcpaf_validates_address_fields_on_register( $posted_data ) {
+	$required_fields = array(
+		'address_1',
+		'city',
+		'state',
+		'country'
+	);
+
+	// Checks for empty fields
+	foreach( $required_fields as $field ) {
+
+		$field_slug = 'rcp_' . $field;
+
+		if( empty( $posted_data[ $field_slug ] ) ) {
+			$label = rcpaf_get_field_label( $field );
+			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
+		}
+
+	}
+
+}
+add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
