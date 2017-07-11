@@ -24,7 +24,7 @@ require_once __DIR__ . '/rcp-address-fields-utils.php';
  * @return string
  */
 function rcpaf_get_field_label( $field_slug ) {
-	switch ( $field_slug ) {
+	switch( $field_slug ) {
 		
 		case 'address_1':
 			return __( 'Address Line 1', 'rcp-address-fields' );
@@ -90,7 +90,7 @@ function rcpaf_get_all_fields_data( $user_id ) {
  * @param string|null   $user_id
  */
 function rcpaf_print_address_fields( $user_id = null ) {
-	if ( is_null( $user_id ) ) {
+	if( is_null( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
 
@@ -111,14 +111,14 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
  * @param int|null  $user_id
  */
 function rcpaf_print_address_fields_admin( $user_id = null ) {
-	if ( is_null( $user_id ) ) {
+	if( is_null( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
 
 	// @todo: build in support for select menus
-	foreach ( $fields as $field ): ?>
+	foreach( $fields as $field ): ?>
 		<tr valign="top">
 			<th scope="row" valign="top">
 				<label for="rcp_<?php echo $field['slug']; ?>">
