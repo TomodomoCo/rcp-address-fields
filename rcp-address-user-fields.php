@@ -89,7 +89,7 @@ function rcpaf_get_all_fields_data( $user_id ) {
  *
  * @param string|null   $user_id
  */
-function rcpaf_add_user_fields( $user_id = null ) {
+function rcpaf_print_address_fields( $user_id = null ) {
 	if ( is_null( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
@@ -102,15 +102,15 @@ function rcpaf_add_user_fields( $user_id = null ) {
 		_e( sprintf( $template, $field['slug'], $field['label'], $field['data'] ), 'rcp-address-fields' );
 	}
 }
-add_action( 'rcp_before_subscription_form_fields', 'rcpaf_add_user_fields' );
-add_action( 'rcp_profile_editor_after', 'rcpaf_add_user_fields' );
+add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );
+add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
 
 /**
- * Print address fields to the member edit screen
+ * Print address fields to the member edit screen in wp-admin
  *
  * @param int|null  $user_id
  */
-function rcpaf_add_member_edit_fields( $user_id = null ) {
+function rcpaf_print_address_fields_admin( $user_id = null ) {
 	if ( is_null( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
@@ -131,4 +131,5 @@ function rcpaf_add_member_edit_fields( $user_id = null ) {
 		</tr>
 	<?php endforeach;
 }
-add_action( 'rcp_edit_member_after', 'rcpaf_add_member_edit_fields' );
+add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields_admin' );
+
