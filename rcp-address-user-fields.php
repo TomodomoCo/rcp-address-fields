@@ -92,34 +92,38 @@ function rcpaf_get_all_fields_data( $user_id ) {
 }
 
 /**
- * Print address fields to the registration form and profile editor (front-facing UIs)
+ * Outputs address form fields for all instances of edit/registration form
  *
- * @param string|null   $user_id
+ * @param null|int  $user_id
  */
 function rcpaf_print_address_fields( $user_id = null ) {
-	if( is_null( $user_id ) ) {
+	if ( is_null( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
 
-	// Retrieve all the address fields
-	$fields   = rcpaf_get_all_fields_data( $user_id );
+	$fields = rcpaf_get_all_fields_data( $user_id );
 
-	foreach ( $fields as $field ) {
+	foreach( $fields as $field ) {
 
-		// Text fields
-		// todo: extract out to new function to add_filter/apply_filters
-		if ( $field['type'] != 'select' ) {
-			rcpaf_build_text_field( $field );
+		// field type detection
+		switch ( $field['type'] ) {
 
-		// Select menus
-		// todo: extract out to new function to add_filter/apply_filters
-		} else {
-			rcpaf_build_select_field( $field );
+			case 'select':
+				rcpaf_build_select_field( $field, false );
+				break;
+
+			case 'text':
+				rcpaf_build_text_field( $field, false );
+				break;
+
+			default:
+				rcpaf_build_text_field( $field, false );
 		}
 	}
 }
-add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );
-add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
+add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
+add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );     // front-facing register
+add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );                // front-facing register > edit my profile
 
 /**
  * Prints a front-facing and admin text field
@@ -131,6 +135,8 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
  * @return string 	$field_html
  */
 function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
+
+	// todo: markup override filter
 
 	// Front-facing text field
 	if ( $frontend != false ) {
@@ -221,31 +227,6 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 }
 
 /**
- * Print address fields to the member edit screen in wp-admin
- *
- * @param int|null  $user_id
- */
-function rcpaf_print_address_fields_admin( $user_id = null ) {
-	if( is_null( $user_id ) ) {
-		$user_id = get_current_user_id();
-	}
-
-	$fields = rcpaf_get_all_fields_data( $user_id );
-
-	foreach( $fields as $field ) {
-
-		// todo: look at a better detect for select and other fields; prob expand to switch/case
-		if( $field['type'] === 'select' ) {
-			rcpaf_build_select_field( $field, false );
-
-		} else {
-			rcpaf_build_text_field( $field, false );
-		}
-	}
-}
-add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields_admin' );
-
-/**
  * Validates address fields during registration
  *
  * @param array     $posted_data
@@ -257,6 +238,8 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		'state',
 		'country'
 	);
+
+	$required_fields = apply_filters( 'rcpaf_required_fields', $required_fields );
 
 	// Checks for empty fields
 	foreach( $required_fields as $field ) {
