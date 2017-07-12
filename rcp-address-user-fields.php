@@ -117,7 +117,7 @@ add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' 
 add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
 
 /**
- * Prints a front-facing and admin text fields
+ * Prints a front-facing and admin text field
  *
  * @param array		$field
  * @param bool 		$frontend
@@ -126,7 +126,7 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
  * @return string 	$field_html
  */
 function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
-
+	
 	// Front-facing text field
 	if ( $frontend != false ) {
 		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
@@ -138,7 +138,6 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 		$label = '<label for="rcp_%1$s">%2$s</label>';
 		$label = sprintf( $label, $field['slug'], $field['label'] );
-
 		$input = '<input name="rcp_%1$s" id="rcp_%1$s" type="text" value="%2$s">';
 		$input = sprintf( $input, $field['slug'], $field['data'] );
 
@@ -219,6 +218,7 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 	// @todo: build in support for select menus
 	foreach( $fields as $field ) {
 
+		// todo: look at a better detect for select and other fields; prob expand to switch/case
 		if( $field['type'] === 'select' ) {
 			rcpaf_build_select_field( $field, false );
 
@@ -252,5 +252,7 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
 	}
+
+	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc.
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
