@@ -12,7 +12,9 @@ Contributors: chrisvanpatten, mcfarlan
 */
 
 // Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // Load dependencies
 require_once __DIR__ . '/rcp-address-fields-utils.php';
@@ -20,12 +22,13 @@ require_once __DIR__ . '/rcp-address-fields-utils.php';
 /**
  * Fetches address form field labels
  *
- * @param string    $field_slug
+ * @param string $field_slug
+ *
  * @return string
  */
 function rcpaf_get_field_label( $field_slug ) {
-	switch( $field_slug ) {
-		
+	switch ( $field_slug ) {
+
 		case 'address_1':
 			return __( 'Address Line 1', 'rcp-address-fields' );
 			break;
@@ -51,8 +54,8 @@ function rcpaf_get_field_label( $field_slug ) {
 /**
  * Fetches a field's label and any saved data for the current user
  *
- * @param string    $field_slug
- * @param int       $user_id
+ * @param string $field_slug
+ * @param int    $user_id
  *
  * @return array
  */
@@ -78,7 +81,8 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
 /**
  * Returns the all user address fields data
  *
- * @param int   $user_id
+ * @param int $user_id
+ *
  * @return array
  */
 function rcpaf_get_all_fields_data( $user_id ) {
@@ -92,9 +96,9 @@ function rcpaf_get_all_fields_data( $user_id ) {
 }
 
 /**
- * Outputs address form fields for all instances of edit/registration form
+ * Outputs address form fields for all instances of edit/registration forms
  *
- * @param null|int  $user_id
+ * @param null|int $user_id
  */
 function rcpaf_print_address_fields( $user_id = null ) {
 	if ( is_null( $user_id ) ) {
@@ -103,7 +107,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
 
-	foreach( $fields as $field ) {
+	foreach ( $fields as $field ) {
 
 		// field type detection
 		switch ( $field['type'] ) {
@@ -121,6 +125,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		}
 	}
 }
+
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
 add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );     // front-facing register
 add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );                // front-facing register > edit my profile
@@ -128,11 +133,11 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );         
 /**
  * Prints a front-facing and admin text field
  *
- * @param array		$field
- * @param bool 		$frontend
- * @param bool 		$print
+ * @param array $field
+ * @param bool  $frontend
+ * @param bool  $print
  *
- * @return string 	$field_html
+ * @return string    $field_html
  */
 function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
@@ -143,9 +148,9 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="%4$s" value="%3$s"></p>';
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
-	// Admin text field
+		// Admin text field
 	} else {
-		$wrap  = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+		$wrap = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
 
 		$label = '<label for="rcp_%1$s">%2$s</label>';
 		$label = sprintf( $label, $field['slug'], $field['label'] );
@@ -155,7 +160,7 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 		$field_html = sprintf( $wrap, $label, $input );
 	}
 
-	if( $print != true ) {
+	if ( $print != true ) {
 		return $field_html;
 	}
 
@@ -165,11 +170,11 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 /**
  * Prints a front-facing and admin select field
  *
- * @param array 	$field
- * @param bool 		$frontend
- * @param bool 		$print
+ * @param array $field
+ * @param bool  $frontend
+ * @param bool  $print
  *
- * @return string 	$field_html
+ * @return string    $field_html
  */
 function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
@@ -182,10 +187,10 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 		$option = '<option value="%1$s" %3$s>%2$s</option>';
 
 		$inner = '';
-		foreach( $data as $key => $value ) {
+		foreach ( $data as $key => $value ) {
 
 			// selects the option if saved value available
-			if ( $field['data'] == $key) {
+			if ( $field['data'] == $key ) {
 				$inner .= sprintf( $option, $key, $value, 'selected' );
 			} else {
 				$inner .= sprintf( $option, $key, $value, false );
@@ -194,19 +199,19 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
 		$output = sprintf( $wrap, $inner, $field['label'] );
 
-	// Admin select field
+		// Admin select field
 	} else {
 		$wrap   = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
 		$option = '<option value="%1$s" %3$s>%2$s</option>';
 
-		$label  = '<label for="rcp_%1$s">%2$s</label>';
-		$label  = sprintf( $label, $field['slug'], $field['label'] );
+		$label = '<label for="rcp_%1$s">%2$s</label>';
+		$label = sprintf( $label, $field['slug'], $field['label'] );
 
 		$output = '<select name="rcp_country" id="rcp_country">';
 		foreach ( $data as $key => $value ) {
 
 			// selects the option if saved value available
-			if ( $field['data'] == $key) {
+			if ( $field['data'] == $key ) {
 				$output .= sprintf( $option, $key, $value, 'selected' );
 
 			} else {
@@ -229,7 +234,7 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 /**
  * Validates address fields during registration
  *
- * @param array     $posted_data
+ * @param array $posted_data
  */
 function rcpaf_validates_address_fields_on_register( $posted_data ) {
 	$required_fields = array(
@@ -242,11 +247,11 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 	$required_fields = apply_filters( 'rcpaf_required_fields', $required_fields );
 
 	// Checks for empty fields
-	foreach( $required_fields as $field ) {
+	foreach ( $required_fields as $field ) {
 
 		$field_slug = 'rcp_' . $field;
 
-		if( empty( $posted_data[ $field_slug ] ) ) {
+		if ( empty( $posted_data[$field_slug] ) ) {
 			$label = rcpaf_get_field_label( $field );
 			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
@@ -254,13 +259,14 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 
 	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc. maybe http://respect.github.io/Validation/
 }
+
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
 
 /**
  * Save custom form values during registration, in admin UIs, and front-facing UIs (see `rcpaf_save_on_front_facing_submission`)
  *
- * @param array		$posted_data
- * @param int		$user_id
+ * @param array $posted_data
+ * @param int   $user_id
  */
 function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 	if ( is_null( $user_id ) ) {
@@ -294,6 +300,7 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		}
 	}
 }
+
 add_action( 'rcp_form_processing', 'rcpaf_save_form_fields', 10, 2 );
 
 /**
@@ -307,5 +314,6 @@ function rcpaf_save_on_front_facing_submission( $user_id ) {
 	// Saves address fields in user meta
 	rcpaf_save_form_fields( $posted_data, $user_id );
 }
+
 add_action( 'rcp_user_profile_updated', 'rcpaf_save_on_front_facing_submission', 10 );
 add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
