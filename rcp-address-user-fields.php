@@ -173,12 +173,17 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 	// Front-facing select field
 	if ( $frontend != false ) {
 		$wrap   = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
-		$option = '<option value="%1$s">%2$s</option>';
+		$option = '<option value="%1$s" %3$s>%2$s</option>';
 
-		// todo: get current user's saved value and check it
 		$inner = '';
 		foreach( $data as $key => $value ) {
-			$inner .= sprintf( $option, $key, $value );
+
+			// selects the option if saved value available
+			if ( $field['data'] == $key) {
+				$inner .= sprintf( $option, $key, $value, 'selected' );
+			} else {
+				$inner .= sprintf( $option, $key, $value, false );
+			}
 		}
 
 		$output = sprintf( $wrap, $inner, $field['label'] );
@@ -186,17 +191,25 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 	// Admin select field
 	} else {
 		$wrap   = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
-		$option = '<option value="%1$s">%2$s</option>';
+		$option = '<option value="%1$s" %3$s>%2$s</option>';
 
-		$label = '<label for="rcp_%1$s">%2$s</label>';
-		$label = sprintf( $label, $field['slug'], $field['label'] );
+		$label  = '<label for="rcp_%1$s">%2$s</label>';
+		$label  = sprintf( $label, $field['slug'], $field['label'] );
 
 		$output = '<select name="rcp_country" id="rcp_country">';
 		foreach ( $data as $key => $value ) {
-			$output .= sprintf( $option, $key, $value );
+
+			// selects the option if saved value available
+			if ( $field['data'] == $key) {
+				$output .= sprintf( $option, $key, $value, 'selected' );
+
+			} else {
+				$output .= sprintf( $option, $key, $value, false );
+			}
 		}
 		$output .= '</select>';
 
+		// Wrap the form field in a table row
 		$output = sprintf( $wrap, $label, $output );
 	}
 
@@ -218,8 +231,7 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 	}
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
-
-	// @todo: build in support for select menus
+	
 	foreach( $fields as $field ) {
 
 		// todo: look at a better detect for select and other fields; prob expand to switch/case
