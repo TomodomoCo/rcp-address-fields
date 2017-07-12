@@ -109,18 +109,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		// Select menus
 		// todo: extract out to new function to add_filter/apply_filters
 		} else {
-			$countries = rcpaf_get_all_countries();
-
-			$wrap = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
-			$option = '<option value="%1$s">%2$s</option>';
-
-			// todo: get current user's saved value and select if available
-			$inner = '';
-			foreach ( $countries as $country_code => $country_name ) {
-				$inner .= sprintf( $option, $country_code, $country_name );
-			}
-
-			echo sprintf( $wrap, $inner, $field['label'] );
+			rcpaf_build_select_field( $field );
 		}
 	}
 }
@@ -156,28 +145,63 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 		$field_html = sprintf( $wrap, $label, $input );
 	}
 
-	if( ! $print ) {
+	if( $print != true ) {
 		return $field_html;
 	}
 
 	echo $field_html;
 }
 
+/**
+ * Prints a front-facing and admin select field
+ *
+ * @param array 	$field
+ * @param bool 		$frontend
+ * @param bool 		$print
+ *
+ * @return string 	$field_html
+ */
+function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
-		$label    = '<label for="rcp_%1$s">%2$s</label>';
-		$label    = sprintf( $label, $field['slug'], $field['label'] );
+	// todo: extend to support than just countries
+	$data = rcpaf_get_all_countries();
 
-		$input    = '<input name="rcp_%1$s" id="rcp_%1$s" type="text" value="%2$s">';
-		$input    = sprintf( $input, $field['slug'], $field['data'] );
+	// Front-facing select field
+	if ( $frontend != false ) {
+		$wrap   = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
+		$option = '<option value="%1$s">%2$s</option>';
 
-		$field_html = sprintf( $wrap, $label, $input );
+		// todo: get current user's saved value and check it
+		$inner = '';
+		foreach( $data as $key => $value ) {
+			$inner .= sprintf( $option, $key, $value );
+		}
+
+		$output = sprintf( $wrap, $inner, $field['label'] );
+
+
+	// Admin select field
+	} else {
+		$wrap   = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+		$option = '<option value="%1$s">%2$s</option>';
+
+		$label = '<label for="rcp_%1$s">%2$s</label>';
+		$label = sprintf( $label, $field['slug'], $field['label'] );
+
+		$output = '<select name="rcp_country" id="rcp_country">';
+		foreach ( $data as $key => $value ) {
+			$output .= sprintf( $option, $key, $value );
+		}
+		$output .= '</select>';
+
+		$output = sprintf( $wrap, $label, $output );
 	}
 
-	if( $print != true ) {
-		return $field_html;
+	if ( $print != true ) {
+		return $output;
 	}
 
-	echo $field_html;
+	echo $output;
 }
 
 /**
@@ -194,7 +218,13 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 
 	// @todo: build in support for select menus
 	foreach( $fields as $field ) {
-		rcpaf_build_text_field( $field, false );
+
+		if( $field['type'] === 'select' ) {
+			rcpaf_build_select_field( $field, false );
+
+		} else {
+			rcpaf_build_text_field( $field, false );
+		}
 	}
 }
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields_admin' );
