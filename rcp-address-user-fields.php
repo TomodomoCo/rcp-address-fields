@@ -61,7 +61,7 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
 	$label         = rcpaf_get_field_label( $field_slug );
 	$type          = 'text';
 	$select_fields = apply_filters( 'rcpaf_select_field_names', [ 'country' ] );
-	
+
 	if ( in_array( $field_slug, $select_fields ) ) {
 		$type = 'select';
 	}
@@ -183,7 +183,6 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
 		$output = sprintf( $wrap, $inner, $field['label'] );
 
-
 	// Admin select field
 	} else {
 		$wrap   = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
@@ -261,3 +260,51 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc.
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
+
+/**
+ * Save custom form values during registration
+ *
+ * @param array		$posted_data
+ * @param int		$user_id
+ */
+function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
+	if ( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
+
+	$fields_to_save = array(
+		'address_1',
+		'address_2',
+		'city',
+		'state',
+		'country'
+	);
+	$fields_to_save = apply_filters( 'rcpaf_fields_to_save', $fields_to_save );
+
+	foreach ( $posted_data as $field_name => $value ) {
+
+		// normalize field slug (remove `rcp_` prefix)
+		$field_slug = substr( $field_name, 4 );
+
+		// save if field name is flagged
+		if ( in_array( $field_slug, $fields_to_save ) && isset( $value ) ) {
+
+			// Save field to user meta
+			update_user_meta(
+				$user_id,
+				$field_name,
+				sanitize_text_field( $value )
+			);
+		}
+	}
+}
+add_action( 'rcp_form_processing', 'rcpaf_save_form_fields', 10, 2 );
+
+function rcpaf_save_on_front_facing_submission( $user_id ) {
+	$posted_data = $_POST;
+
+	// Saves address fields in user meta
+	rcpaf_save_form_fields( $posted_data, $user_id );
+}
+add_action( 'rcp_user_profile_updated', 'rcpaf_save_on_front_facing_submission', 10 );
+add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
