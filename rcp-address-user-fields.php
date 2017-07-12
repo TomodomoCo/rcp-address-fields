@@ -106,7 +106,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		// Text fields
 		// todo: extract out to new function to add_filter/apply_filters
 		if ( $field['type'] != 'select' ) {
-			_e( sprintf( $text_field_markup, $field['slug'], $field['label'], $field['data'] ), 'rcp-address-fields' );
+			rcpaf_build_text_field( $field, true );
 
 		// Select menus
 		// todo: extract out to new function to add_filter/apply_filters
@@ -130,6 +130,42 @@ add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' 
 add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
 
 /**
+ * Prints a front-facing and admin text fields
+ *
+ * @param array		$field
+ * @param bool 		$frontend
+ * @param bool 		$print
+ *
+ * @return string 	$field_html
+ */
+function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
+
+	// Front-facing text field
+	if ( $frontend != false ) {
+		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
+		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'] );
+
+	// Admin text field
+	} else {
+		$wrap     = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+
+		$label    = '<label for="rcp_%1$s">%2$s</label>';
+		$label    = sprintf( $label, $field['slug'], $field['label'] );
+
+		$input    = '<input name="rcp_%1$s" id="rcp_%1$s" type="text" value="%2$s">';
+		$input    = sprintf( $input, $field['slug'], $field['data'] );
+
+		$field_html = sprintf( $wrap, $label, $input );
+	}
+
+	if( $print != true ) {
+		return $field_html;
+	}
+
+	echo $field_html;
+}
+
+/**
  * Print address fields to the member edit screen in wp-admin
  *
  * @param int|null  $user_id
@@ -142,18 +178,9 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 	$fields = rcpaf_get_all_fields_data( $user_id );
 
 	// @todo: build in support for select menus
-	foreach( $fields as $field ): ?>
-		<tr valign="top">
-			<th scope="row" valign="top">
-				<label for="rcp_<?php echo $field['slug']; ?>">
-					<?php echo $field['label']; ?>
-				</label>
-			</th>
-			<td>
-				<input name="rcp_<?php echo $field['slug']; ?>" id="rcp_<?php echo $field['slug']; ?>" type="text" value="<?php echo esc_attr( $field['data'] ); ?>">
-			</td>
-		</tr>
-	<?php endforeach;
+	foreach( $fields as $field ) {
+		rcpaf_build_text_field( $field, false );
+	}
 }
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields_admin' );
 
