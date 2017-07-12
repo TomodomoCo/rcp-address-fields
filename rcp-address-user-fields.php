@@ -59,12 +59,14 @@ function rcpaf_get_field_label( $field_slug ) {
 function rcpaf_get_field_data( $field_slug, $user_id ) {
 	$data  = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
 	$label = rcpaf_get_field_label( $field_slug );
+	$type  = $field_slug == 'country' ? 'select' : 'text';
 
 	// @todo: build in type of field (text, select)
 	return array(
 		'slug'  => $field_slug,
 		'label' => $label,
-		'data'  => $data
+		'data'  => $data,
+		'type'  => $type
 	);
 }
 
@@ -96,10 +98,32 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	// Retrieve all the address fields
 	$fields   = rcpaf_get_all_fields_data( $user_id );
-	$template = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
+
+	$text_field_markup = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
 
 	foreach ( $fields as $field ) {
-		_e( sprintf( $template, $field['slug'], $field['label'], $field['data'] ), 'rcp-address-fields' );
+
+		// Text fields
+		// todo: extract out to new function to add_filter/apply_filters
+		if ( $field['type'] != 'select' ) {
+			_e( sprintf( $text_field_markup, $field['slug'], $field['label'], $field['data'] ), 'rcp-address-fields' );
+
+		// Select menus
+		// todo: extract out to new function to add_filter/apply_filters
+		} else {
+			$countries = rcpaf_get_all_countries();
+
+			$wrap = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
+			$option = '<option value="%1$s">%2$s</option>';
+
+			// todo: get current user's saved value and select if available
+			$inner = '';
+			foreach ( $countries as $country_code => $country_name ) {
+				$inner .= sprintf( $option, $country_code, $country_name );
+			}
+
+			echo sprintf( $wrap, $inner, $field['label'] );
+		}
 	}
 }
 add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );
@@ -155,8 +179,6 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 			$label = rcpaf_get_field_label( $field );
 			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
-
 	}
-
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
