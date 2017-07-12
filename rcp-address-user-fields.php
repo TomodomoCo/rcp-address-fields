@@ -231,7 +231,7 @@ function rcpaf_print_address_fields_admin( $user_id = null ) {
 	}
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
-	
+
 	foreach( $fields as $field ) {
 
 		// todo: look at a better detect for select and other fields; prob expand to switch/case
@@ -269,12 +269,12 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		}
 	}
 
-	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc.
+	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc. maybe http://respect.github.io/Validation/
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
 
 /**
- * Save custom form values during registration
+ * Save custom form values during registration, in admin UIs, and front-facing UIs (see `rcpaf_save_on_front_facing_submission`)
  *
  * @param array		$posted_data
  * @param int		$user_id
@@ -291,6 +291,7 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		'state',
 		'country'
 	);
+
 	$fields_to_save = apply_filters( 'rcpaf_fields_to_save', $fields_to_save );
 
 	foreach ( $posted_data as $field_name => $value ) {
@@ -312,6 +313,11 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 }
 add_action( 'rcp_form_processing', 'rcpaf_save_form_fields', 10, 2 );
 
+/**
+ * Saves custom form fields for front-facing UIs
+ *
+ * @param $user_id
+ */
 function rcpaf_save_on_front_facing_submission( $user_id ) {
 	$posted_data = $_POST;
 
