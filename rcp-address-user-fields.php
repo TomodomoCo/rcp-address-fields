@@ -87,7 +87,7 @@ function rcpaf_get_all_fields_data( $user_id ) {
 }
 
 /**
- * Print address fields to the registration form and profile editor
+ * Print address fields to the registration form and profile editor (front-facing UIs)
  *
  * @param string|null   $user_id
  */
@@ -99,14 +99,12 @@ function rcpaf_print_address_fields( $user_id = null ) {
 	// Retrieve all the address fields
 	$fields   = rcpaf_get_all_fields_data( $user_id );
 
-	$text_field_markup = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
-
 	foreach ( $fields as $field ) {
 
 		// Text fields
 		// todo: extract out to new function to add_filter/apply_filters
 		if ( $field['type'] != 'select' ) {
-			rcpaf_build_text_field( $field, true );
+			rcpaf_build_text_field( $field );
 
 		// Select menus
 		// todo: extract out to new function to add_filter/apply_filters
@@ -147,7 +145,24 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 	// Admin text field
 	} else {
-		$wrap     = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+		$wrap  = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+
+		$label = '<label for="rcp_%1$s">%2$s</label>';
+		$label = sprintf( $label, $field['slug'], $field['label'] );
+
+		$input = '<input name="rcp_%1$s" id="rcp_%1$s" type="text" value="%2$s">';
+		$input = sprintf( $input, $field['slug'], $field['data'] );
+
+		$field_html = sprintf( $wrap, $label, $input );
+	}
+
+	if( ! $print ) {
+		return $field_html;
+	}
+
+	echo $field_html;
+}
+
 
 		$label    = '<label for="rcp_%1$s">%2$s</label>';
 		$label    = sprintf( $label, $field['slug'], $field['label'] );
