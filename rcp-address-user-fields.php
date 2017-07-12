@@ -134,8 +134,8 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 	// Front-facing text field
 	if ( $frontend != false ) {
-		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="text" value="%3$s"></p>';
-		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'] );
+		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="%4$s" value="%3$s"></p>';
+		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
 	// Admin text field
 	} else {
@@ -143,8 +143,8 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 		$label = '<label for="rcp_%1$s">%2$s</label>';
 		$label = sprintf( $label, $field['slug'], $field['label'] );
-		$input = '<input name="rcp_%1$s" id="rcp_%1$s" type="text" value="%2$s">';
-		$input = sprintf( $input, $field['slug'], $field['data'] );
+		$input = '<input name="rcp_%1$s" id="rcp_%1$s" type="%3$s" value="%2$s">';
+		$input = sprintf( $input, $field['slug'], $field['data'], $field['type'] );
 
 		$field_html = sprintf( $wrap, $label, $input );
 	}
