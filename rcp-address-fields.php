@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Load dependencies
 require_once __DIR__ . '/rcp-address-fields-utils.php';
+require_once __DIR__ . '/rcp-address-fields-filters.php';
 
 /**
  * Fetches address form field labels
