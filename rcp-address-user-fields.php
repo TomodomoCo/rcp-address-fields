@@ -69,7 +69,6 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
 		$type = 'select';
 	}
 
-	// @todo: build in type of field (text, select)
 	return array(
 		'slug'  => $field_slug,
 		'label' => $label,
@@ -109,6 +108,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	foreach ( $fields as $field ) {
 
+		// todo: expand for other field types (email)
 		// field type detection
 		switch ( $field['type'] ) {
 
