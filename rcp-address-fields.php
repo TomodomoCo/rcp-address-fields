@@ -85,7 +85,10 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
  *
  * @return array
  */
-function rcpaf_get_all_fields_data( $user_id ) {
+function rcpaf_get_all_fields_data( $user_id = null ) {
+	if ( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
 	$address_1 = rcpaf_get_field_data( 'address_1', $user_id );
 	$address_2 = rcpaf_get_field_data( 'address_2', $user_id );
 	$city      = rcpaf_get_field_data( 'city', $user_id );
@@ -107,6 +110,8 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
 
+	$is_frontend = ! is_admin() ? true : false;
+
 	foreach ( $fields as $field ) {
 
 		// todo: expand for other field types (email)
@@ -114,15 +119,15 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		switch ( $field['type'] ) {
 
 			case 'select':
-				rcpaf_build_select_field( $field, false );
+				rcpaf_build_select_field( $field, $is_frontend );
 				break;
 
 			case 'text':
-				rcpaf_build_text_field( $field, false );
+				rcpaf_build_text_field( $field, $is_frontend );
 				break;
 
 			default:
-				rcpaf_build_text_field( $field, false );
+				rcpaf_build_text_field( $field, $is_frontend );
 		}
 	}
 }
