@@ -61,9 +61,9 @@ function rcpaf_get_field_label( $field_slug ) {
  * @return array
  */
 function rcpaf_get_field_data( $field_slug, $user_id ) {
-	$data          = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
-	$label         = rcpaf_get_field_label( $field_slug );
 	$type          = 'text';
+	$data          = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
+	$label         = apply_filters( 'rcpaf_field_label', rcpaf_get_field_label( $field_slug ), $field_slug );
 	$select_fields = apply_filters( 'rcpaf_select_field_names', [ 'country' ] );
 
 	if ( in_array( $field_slug, $select_fields ) ) {
@@ -147,8 +147,6 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );         
  */
 function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
-	// todo: markup override filter
-
 	// Front-facing text field
 	if ( $frontend != false ) {
 		$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
@@ -159,7 +157,7 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 			$field_html = apply_filters( 'rcpaf_public_text_field', $field_html, $field );
 		}
 
-		// Admin text field
+	// Admin text field
 	} else {
 		$wrap = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
 
@@ -268,8 +266,10 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		$field_slug = 'rcp_' . $field;
 
 		if ( empty( $posted_data[$field_slug] ) ) {
-			$label = rcpaf_get_field_label( $field );
-			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
+			$label = apply_filters( 'rcpaf_field_label', rcpaf_get_field_label( $field ), $field );
+
+			rcp_errors()->add(
+				'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
 	}
 

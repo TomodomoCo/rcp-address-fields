@@ -108,3 +108,37 @@ function rcpaf_admin_text_field_filter( $field_html, $field ) {
 	return $field_html;
 }
 //add_filter( 'rcpaf_admin_text_field', 'rcpaf_admin_text_field_filter', 10, 2 );
+
+/**
+ * Overrides the default labels based upon the field slug
+ *
+ * @param string $label
+ * @param string $field_slug
+ *
+ * @return string
+ */
+function rcpaf_field_label_filter( $label, $field_slug ) {
+	switch ( $field_slug ) {
+
+		case 'address_1':
+			return __( 'Address Line 1', 'rcp-address-fields' );
+			break;
+
+		case 'address_2':
+			return __( 'Address Line 2', 'rcp-address-fields' );
+			break;
+
+		case 'city':
+			return __( 'City', 'rcp-address-fields' );
+			break;
+
+		case 'state':
+			return __( 'State/Province', 'rcp-address-fields' );
+			break;
+
+		case 'country':
+			return __( 'Country', 'rcp-address-fields' );
+			break;
+	}
+}
+//add_filter( 'rcpaf_field_label', 'rcpaf_field_label_filter', 10, 2 );
