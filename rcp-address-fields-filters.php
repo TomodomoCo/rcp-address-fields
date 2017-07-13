@@ -85,3 +85,26 @@ function rcpaf_public_text_field_filter( $field_html, $field ) {
 	);
 }
 //add_filter( 'rcpaf_public_text_field', 'rcpaf_public_text_field_filter', 10, 2 );
+
+/**
+ * Overrides the markup/output of text fields in admin UIs
+ *
+ * @param string $field_html
+ * @param array $field
+ *
+ * @return string $field_html
+ */
+function rcpaf_admin_text_field_filter( $field_html, $field ) {
+	$wrap = '<tr valign="top" id="rcp_%3$s_wrap"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
+
+	$label_template = '<label for="rcp_%1$s">%2$s</label>';
+	$input_template = '<input name="rcp_%1$s" id="rcp_%1$s" type="%3$s" value="%2$s">';
+
+	$label = sprintf( $label_template, $field['slug'], $field['label'] );
+	$input = sprintf( $input_template, $field['slug'], $field['data'], $field['type'] );
+
+	$field_html = sprintf( $wrap, $label, $input, $field['slug'] );
+
+	return $field_html;
+}
+//add_filter( 'rcpaf_admin_text_field', 'rcpaf_admin_text_field_filter', 10, 2 );
