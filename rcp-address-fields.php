@@ -151,8 +151,13 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 	// Front-facing text field
 	if ( $frontend != false ) {
-		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="%4$s" value="%3$s"></p>';
+		$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
+
+		// Override markup
+		if ( has_filter( 'rcpaf_public_text_field' ) ) {
+			$field_html = apply_filters( 'rcpaf_public_text_field', $field_html, $field );
+		}
 
 		// Admin text field
 	} else {

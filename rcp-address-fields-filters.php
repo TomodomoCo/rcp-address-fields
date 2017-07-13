@@ -65,3 +65,23 @@ function rcpaf_select_field_names_filter() {
 	return $select_fields;
 }
 // add_filter( 'rcpaf_select_field_names', 'rcpaf_select_field_names_filter' );
+
+/**
+ * Overrides the markup/output of text fields in front-facing UIs
+ *
+ * @param string $field_html
+ * @param array $field
+ *
+ * @return string
+ */
+function rcpaf_public_text_field_filter( $field_html, $field ) {
+	$template = '<p id="rcp_%1$s_wrap"><label for="rcp_%1$s">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
+
+	return sprintf( $template,
+		$field['slug'],
+		$field['label'],
+		$field['data'],
+		$field['type']
+	);
+}
+//add_filter( 'rcpaf_public_text_field', 'rcpaf_public_text_field_filter', 10, 2 );
