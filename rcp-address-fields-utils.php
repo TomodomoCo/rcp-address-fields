@@ -70,12 +70,11 @@ add_action( 'admin_init', 'rcpaf_is_rcp_active' );
 /**
  * Fetches all available countries for sale
  *
- * @return array
+ * @return array $countries
  */
 function rcpaf_get_all_countries() {
 
-	// todo: build in filter to omit certain countries
-	return array(
+	$countries = array(
 		'AF' => __( 'Afghanistan', 'rcp-address-fields' ),
 		'AX' => __( '&#197;land Islands', 'rcp-address-fields' ),
 		'AL' => __( 'Albania', 'rcp-address-fields' ),
@@ -326,4 +325,14 @@ function rcpaf_get_all_countries() {
 		'ZM' => __( 'Zambia', 'rcp-address-fields' ),
 		'ZW' => __( 'Zimbabwe', 'rcp-address-fields' ),
 	);
+
+	// Filter not used, send default country list
+	if ( ! has_filter( 'rcpaf_restrict_countries' ) ) {
+		return $countries;
+	}
+
+	// Filter in use, apply changes
+	$countries = apply_filters( 'rcpaf_restrict_countries', $countries );
+
+	return $countries;
 }
