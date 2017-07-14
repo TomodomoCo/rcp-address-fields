@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Load dependencies
 require_once __DIR__ . '/rcp-address-fields-utils.php';
+require_once __DIR__ . '/rcp-address-fields-filters.php';
 
 /**
  * Fetches address form field labels
@@ -60,9 +61,9 @@ function rcpaf_get_field_label( $field_slug ) {
  * @return array
  */
 function rcpaf_get_field_data( $field_slug, $user_id ) {
-	$data          = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
-	$label         = rcpaf_get_field_label( $field_slug );
 	$type          = 'text';
+	$data          = get_user_meta( $user_id, 'rcp_' . $field_slug, true );
+	$label         = apply_filters( 'rcpaf_field_label', rcpaf_get_field_label( $field_slug ), $field_slug );
 	$select_fields = apply_filters( 'rcpaf_select_field_names', [ 'country' ] );
 
 	if ( in_array( $field_slug, $select_fields ) ) {
@@ -84,7 +85,10 @@ function rcpaf_get_field_data( $field_slug, $user_id ) {
  *
  * @return array
  */
-function rcpaf_get_all_fields_data( $user_id ) {
+function rcpaf_get_all_fields_data( $user_id = null ) {
+	if ( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
 	$address_1 = rcpaf_get_field_data( 'address_1', $user_id );
 	$address_2 = rcpaf_get_field_data( 'address_2', $user_id );
 	$city      = rcpaf_get_field_data( 'city', $user_id );
@@ -106,6 +110,8 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	$fields = rcpaf_get_all_fields_data( $user_id );
 
+	$is_frontend = ! is_admin() ? true : false;
+
 	foreach ( $fields as $field ) {
 
 		// todo: expand for other field types (email)
@@ -113,15 +119,15 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		switch ( $field['type'] ) {
 
 			case 'select':
-				rcpaf_build_select_field( $field, false );
+				rcpaf_build_select_field( $field, $is_frontend );
 				break;
 
 			case 'text':
-				rcpaf_build_text_field( $field, false );
+				rcpaf_build_text_field( $field, $is_frontend );
 				break;
 
 			default:
-				rcpaf_build_text_field( $field, false );
+				rcpaf_build_text_field( $field, $is_frontend );
 		}
 	}
 }
@@ -141,23 +147,31 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );         
  */
 function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
-	// todo: markup override filter
-
 	// Front-facing text field
 	if ( $frontend != false ) {
-		$template   = '<p><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_profession" type="%4$s" value="%3$s"></p>';
+		$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
-		// Admin text field
+		// Override markup
+		if ( has_filter( 'rcpaf_public_text_field' ) ) {
+			$field_html = apply_filters( 'rcpaf_public_text_field', $field_html, $field );
+		}
+
+	// Admin text field
 	} else {
 		$wrap = '<tr valign="top"><th scope="row" valign="top">%1$s</th><td>%2$s</td></tr>';
 
-		$label = '<label for="rcp_%1$s">%2$s</label>';
-		$label = sprintf( $label, $field['slug'], $field['label'] );
-		$input = '<input name="rcp_%1$s" id="rcp_%1$s" type="%3$s" value="%2$s">';
-		$input = sprintf( $input, $field['slug'], $field['data'], $field['type'] );
+		$label_template = '<label for="rcp_%1$s">%2$s</label>';
+		$input_template = '<input name="rcp_%1$s" id="rcp_%1$s" type="%3$s" value="%2$s">';
+
+		$label = sprintf( $label_template, $field['slug'], $field['label'] );
+		$input = sprintf( $input_template, $field['slug'], $field['data'], $field['type'] );
 
 		$field_html = sprintf( $wrap, $label, $input );
+
+		if ( has_filter( 'rcpaf_admin_text_field' ) ) {
+			$field_html = apply_filters( 'rcpaf_admin_text_field', $field_html, $field );
+		}
 	}
 
 	if ( $print != true ) {
@@ -252,8 +266,10 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		$field_slug = 'rcp_' . $field;
 
 		if ( empty( $posted_data[$field_slug] ) ) {
-			$label = rcpaf_get_field_label( $field );
-			rcp_errors()->add( 'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
+			$label = apply_filters( 'rcpaf_field_label', rcpaf_get_field_label( $field ), $field );
+
+			rcp_errors()->add(
+				'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
 	}
 
