@@ -133,6 +133,22 @@ function rcpaf_print_address_fields( $user_id = null ) {
 	if ( $is_frontend !== false ) {
 		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
 
+		// check for disable editing flag, user must be logged in
+		if ( $disable_editing !== false && is_user_logged_in() ) {
+
+			// check for saved data
+			$count = 0;
+			foreach( $fields as $field ) {
+				if ( $field['data'] ) {
+					$count++;
+				}
+			}
+
+			// display notice about editing address fields if data already saved
+			if ( $count > 0 ) {
+				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', rcpaf_notice_below_address_fields() );
+			}
+		}
 	}
 }
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
@@ -154,6 +170,21 @@ function rcpaf_maybe_disable_field_editing( $field_data ) {
 	}
 
 	return false;
+}
+
+/**
+ * Used to display a custom message below address field editing
+ *
+ * @return string $message
+ */
+function rcpaf_notice_below_address_fields() {
+	$message = sprintf(
+		'<p class="rcp_success">%1$s <a href="mailto:%2$s">%2$s</a></p>',
+		'To have your address changed, please contact',
+		'support@mindful.org'
+	);
+
+	return $message;
 }
 
 /**
