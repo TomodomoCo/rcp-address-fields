@@ -114,7 +114,6 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 	foreach ( $fields as $field ) {
 
-		// todo: expand for other field types (email)
 		// field type detection
 		switch ( $field['type'] ) {
 
@@ -130,11 +129,63 @@ function rcpaf_print_address_fields( $user_id = null ) {
 				rcpaf_build_text_field( $field, $is_frontend );
 		}
 	}
-}
 
+	if ( $is_frontend !== false ) {
+		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+
+		// check for disable editing flag, user must be logged in
+		if ( $disable_editing !== false && is_user_logged_in() ) {
+
+			// check for saved data
+			$count = 0;
+			foreach( $fields as $field ) {
+				if ( $field['data'] ) {
+					$count++;
+				}
+			}
+
+			// display notice about editing address fields if data already saved
+			if ( $count > 0 ) {
+				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', rcpaf_notice_below_address_fields() );
+			}
+		}
+	}
+}
 add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
 add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );     // front-facing register
 add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );                // front-facing register > edit my profile
+
+/**
+ * Disables address field editing for users if data is already saved
+ *
+ * @param string $field_data
+ *
+ * @return bool
+ */
+function rcpaf_maybe_disable_field_editing( $field_data ) {
+	$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+
+	if ( $disable_editing !== false && isset( $field_data ) && $field_data != '' ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Used to display a custom message below address field editing
+ *
+ * @return string $message
+ */
+function rcpaf_notice_below_address_fields() {
+	$message = sprintf(
+		'<p class="rcp_success">%1$s <a href="mailto:%2$s">%2$s</a></p>',
+		'To have your address changed, please contact',
+		'support@mindful.org'
+	);
+
+	return $message;
+}
 
 /**
  * Prints a front-facing and admin text field
@@ -149,7 +200,16 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 	// Front-facing text field
 	if ( $frontend != false ) {
-		$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
+
+		// check for disable editing flag
+		$disable_editing = rcpaf_maybe_disable_field_editing( $field['data'] );
+
+		// disable field if flag enabled and field data already present
+		if ( $disable_editing !== false ) {
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" disabled class="disabled" value="%3$s"></p>';
+		} else {
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
+		}
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
 		// Override markup
@@ -197,7 +257,16 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
 	// Front-facing select field
 	if ( $frontend != false ) {
-		$wrap   = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
+		// check for disable editing flag
+		$disable_editing = rcpaf_maybe_disable_field_editing( $field['data'] );
+
+		// disable field if flag enabled and field data already present
+		if ( $disable_editing !== false ) {
+			$wrap   = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country" disabled>%1$s</select></p>';
+		} else {
+			$wrap   = '<p><label for="rcp_country">%2$s</label><select name="rcp_country" id="rcp_country">%1$s</select></p>';
+		}
+
 		$option = '<option value="%1$s" %3$s>%2$s</option>';
 
 		$inner = '';
@@ -275,7 +344,6 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 
 	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc. maybe http://respect.github.io/Validation/
 }
-
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
 
 /**
@@ -316,7 +384,6 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		}
 	}
 }
-
 add_action( 'rcp_form_processing', 'rcpaf_save_form_fields', 10, 2 );
 
 /**
