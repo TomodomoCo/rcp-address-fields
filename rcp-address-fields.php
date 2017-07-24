@@ -146,7 +146,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 			// display notice about editing address fields if data already saved
 			if ( $count > 0 ) {
-				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', rcpaf_notice_below_address_fields() );
+				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', '<p class="rcp_success">Address cannot be changed once saved. Please contact support to update your address.</p>' );
 			}
 		}
 	}
@@ -170,21 +170,6 @@ function rcpaf_maybe_disable_field_editing( $field_data ) {
 	}
 
 	return false;
-}
-
-/**
- * Used to display a custom message below address field editing
- *
- * @return string $message
- */
-function rcpaf_notice_below_address_fields() {
-	$message = sprintf(
-		'<p class="rcp_success">%1$s <a href="mailto:%2$s">%2$s</a></p>',
-		'To have your address changed, please contact',
-		'support@mindful.org'
-	);
-
-	return $message;
 }
 
 /**
