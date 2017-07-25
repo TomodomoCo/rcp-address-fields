@@ -142,3 +142,15 @@ function rcpaf_field_label_filter( $label, $field_slug ) {
 	}
 }
 //add_filter( 'rcpaf_field_label', 'rcpaf_field_label_filter', 10, 2 );
+
+/**
+ * Filter to disable the editing of address fields once they are saved
+ *
+ * @param array $field_data
+ *
+ * @return bool
+ */
+function rcpaf_disable_address_field_editing( $field_data ) {
+	return true;
+}
+//add_filter( 'rcpaf_disable_address_field_editing', 'override_this' );

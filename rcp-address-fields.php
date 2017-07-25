@@ -131,7 +131,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 	}
 
 	if ( $is_frontend !== false ) {
-		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', false );
 
 		// check for disable editing flag, user must be logged in
 		if ( $disable_editing !== false && is_user_logged_in() ) {
@@ -163,9 +163,9 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );         
  * @return bool
  */
 function rcpaf_maybe_disable_field_editing( $field_data ) {
-	$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+	$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', false );
 
-	if ( $disable_editing !== false && isset( $field_data ) && $field_data != '' ) {
+	if ( $disable_editing !== false && isset( $field_data ) && $field_data != '' && ! empty( $field_data ) ) {
 		return true;
 	}
 
