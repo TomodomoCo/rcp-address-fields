@@ -146,7 +146,8 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 			// display notice about editing address fields if data already saved
 			if ( $count > 0 ) {
-				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', '<p class="rcp_success">Address cannot be changed once saved. Please contact support to update your address.</p>' );
+				$default_message = '<p class="rcp_success">Address cannot be changed once saved. Please contact support to update your address.</p>';
+				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', $default_message );
 			}
 		}
 	}
@@ -219,6 +220,7 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 		}
 	}
 
+	// Return the field markup (instead of printing)
 	if ( $print != true ) {
 		return $field_html;
 	}
@@ -241,6 +243,7 @@ function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
 	// Front-facing select field
 	if ( $frontend != false ) {
+
 		// check for disable editing flag
 		$disable_editing = rcpaf_maybe_disable_field_editing( $field['data'] );
 
@@ -311,6 +314,7 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		'country'
 	);
 
+	// Override available to set 'required' address fields
 	$required_fields = apply_filters( 'rcpaf_required_fields', $required_fields );
 
 	// Checks for empty fields
@@ -381,6 +385,26 @@ function rcpaf_save_on_front_facing_submission( $user_id ) {
 	// Saves address fields in user meta
 	rcpaf_save_form_fields( $posted_data, $user_id );
 }
-
 add_action( 'rcp_user_profile_updated', 'rcpaf_save_on_front_facing_submission', 10 );
 add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
+
+/**
+ * Checks if RCP is active. Self de-activates with notice if RCP unavailable
+ *
+ * @return bool
+ */
+function rcpaf_is_rcp_active() {
+	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) ) {
+
+		// Display notice for RCP plugin requirement
+		add_action('admin_notices', 'rcpaf_notice_activate_rcp');
+
+		// Self deactivate for safety if RCP is unavailable
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+
+		return false;
+	}
+
+	return true;
+}
+add_action( 'admin_init', 'rcpaf_is_rcp_active' );
