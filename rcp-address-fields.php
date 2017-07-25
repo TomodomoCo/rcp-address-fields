@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load dependencies
-require_once __DIR__ . '/rcp-address-fields-utils.php';
-require_once __DIR__ . '/rcp-address-fields-filters.php';
+require_once __DIR__ . '/includes/utils.php';
+require_once __DIR__ . '/includes/filters.php';
 
 /**
  * Fetches address form field labels
@@ -237,7 +237,6 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
  */
 function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
-	// todo: extend to support than just countries
 	$data = rcpaf_get_all_countries();
 
 	// Front-facing select field
@@ -326,8 +325,6 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 				'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
 	}
-
-	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc. maybe http://respect.github.io/Validation/
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
 
@@ -360,11 +357,13 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		// save if field name is flagged
 		if ( in_array( $field_slug, $fields_to_save ) && isset( $value ) ) {
 
+			sanitize_text_field( $value );
+
 			// Save field to user meta
 			update_user_meta(
 				$user_id,
 				$field_name,
-				sanitize_text_field( $value )
+				$value
 			);
 		}
 	}
