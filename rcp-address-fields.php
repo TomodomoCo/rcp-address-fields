@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load dependencies
-require_once __DIR__ . '/rcp-address-fields-utils.php';
-require_once __DIR__ . '/rcp-address-fields-filters.php';
+require_once __DIR__ . '/includes/utils.php';
+require_once __DIR__ . '/includes/filters.php';
 
 /**
  * Fetches address form field labels
@@ -131,7 +131,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 	}
 
 	if ( $is_frontend !== false ) {
-		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+		$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', false );
 
 		// check for disable editing flag, user must be logged in
 		if ( $disable_editing !== false && is_user_logged_in() ) {
@@ -146,7 +146,8 @@ function rcpaf_print_address_fields( $user_id = null ) {
 
 			// display notice about editing address fields if data already saved
 			if ( $count > 0 ) {
-				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', rcpaf_notice_below_address_fields() );
+				$default_message = '<p class="rcp_success">Address cannot be changed once saved. Please contact support to update your address.</p>';
+				echo apply_filters( 'rcpaf_disable_field_editing_notice_bottom', $default_message );
 			}
 		}
 	}
@@ -163,28 +164,13 @@ add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );         
  * @return bool
  */
 function rcpaf_maybe_disable_field_editing( $field_data ) {
-	$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', true );
+	$disable_editing = apply_filters( 'rcpaf_disable_address_field_editing', false );
 
-	if ( $disable_editing !== false && isset( $field_data ) && $field_data != '' ) {
+	if ( $disable_editing !== false && isset( $field_data ) && $field_data != '' && ! empty( $field_data ) ) {
 		return true;
 	}
 
 	return false;
-}
-
-/**
- * Used to display a custom message below address field editing
- *
- * @return string $message
- */
-function rcpaf_notice_below_address_fields() {
-	$message = sprintf(
-		'<p class="rcp_success">%1$s <a href="mailto:%2$s">%2$s</a></p>',
-		'To have your address changed, please contact',
-		'support@mindful.org'
-	);
-
-	return $message;
 }
 
 /**
@@ -234,6 +220,7 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 		}
 	}
 
+	// Return the field markup (instead of printing)
 	if ( $print != true ) {
 		return $field_html;
 	}
@@ -252,11 +239,11 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
  */
 function rcpaf_build_select_field( $field, $frontend = true, $print = true ) {
 
-	// todo: extend to support than just countries
 	$data = rcpaf_get_all_countries();
 
 	// Front-facing select field
 	if ( $frontend != false ) {
+
 		// check for disable editing flag
 		$disable_editing = rcpaf_maybe_disable_field_editing( $field['data'] );
 
@@ -327,6 +314,7 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		'country'
 	);
 
+	// Override available to set 'required' address fields
 	$required_fields = apply_filters( 'rcpaf_required_fields', $required_fields );
 
 	// Checks for empty fields
@@ -341,8 +329,6 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 				'invalid_address', __( 'Please enter your ' . $label, 'rcp-address-fields' ), 'register' );
 		}
 	}
-
-	// todo: add more validation on a per field basis; maybe pass attr like `required`, `email`, etc. maybe http://respect.github.io/Validation/
 }
 add_action( 'rcp_form_errors', 'rcpaf_validates_address_fields_on_register', 10 );
 
@@ -375,11 +361,13 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		// save if field name is flagged
 		if ( in_array( $field_slug, $fields_to_save ) && isset( $value ) ) {
 
+			sanitize_text_field( $value );
+
 			// Save field to user meta
 			update_user_meta(
 				$user_id,
 				$field_name,
-				sanitize_text_field( $value )
+				$value
 			);
 		}
 	}
@@ -397,6 +385,26 @@ function rcpaf_save_on_front_facing_submission( $user_id ) {
 	// Saves address fields in user meta
 	rcpaf_save_form_fields( $posted_data, $user_id );
 }
-
 add_action( 'rcp_user_profile_updated', 'rcpaf_save_on_front_facing_submission', 10 );
 add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
+
+/**
+ * Checks if RCP is active. Self de-activates with notice if RCP unavailable
+ *
+ * @return bool
+ */
+function rcpaf_is_rcp_active() {
+	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) ) {
+
+		// Display notice for RCP plugin requirement
+		add_action('admin_notices', 'rcpaf_notice_activate_rcp');
+
+		// Self deactivate for safety if RCP is unavailable
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+
+		return false;
+	}
+
+	return true;
+}
+add_action( 'admin_init', 'rcpaf_is_rcp_active' );
