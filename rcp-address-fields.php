@@ -152,9 +152,26 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		}
 	}
 }
-add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
-add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );     // front-facing register
-add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );                // front-facing register > edit my profile
+
+/**
+ * Checks for user login status and maybe displays address fields for given context
+ */
+function rcpaf_maybe_display_address_fields() {
+
+	// Display on registration page if not logged in
+	if ( ! is_user_logged_in() ) {
+		add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );
+
+	} else {
+
+		// Admin UI
+		add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );
+
+		// Front-Facing register > edit my profile
+		add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
+	}
+}
+add_action( 'init', 'rcpaf_maybe_display_address_fields' );
 
 /**
  * Disables address field editing for users if data is already saved
