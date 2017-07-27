@@ -209,9 +209,9 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 		// disable field if flag enabled and field data already present
 		if ( $disable_editing !== false ) {
-			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" disabled class="disabled" value="%3$s"></p>';
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_%1$s">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" disabled class="disabled" value="%3$s"></p>';
 		} else {
-			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_%1$s">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
 		}
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
