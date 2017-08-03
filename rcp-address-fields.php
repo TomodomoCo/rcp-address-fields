@@ -46,6 +46,10 @@ function rcpaf_get_field_label( $field_slug ) {
 			return __( 'State/Province', 'rcp-address-fields' );
 			break;
 
+		case 'postal':
+			return __( 'Postal/ZIP Code', 'rcp-address-fields' );
+			break;
+
 		case 'country':
 			return __( 'Country', 'rcp-address-fields' );
 			break;
@@ -93,9 +97,10 @@ function rcpaf_get_all_fields_data( $user_id = null ) {
 	$address_2 = rcpaf_get_field_data( 'address_2', $user_id );
 	$city      = rcpaf_get_field_data( 'city', $user_id );
 	$state     = rcpaf_get_field_data( 'state', $user_id );
+	$postal    = rcpaf_get_field_data( 'postal', $user_id );
 	$country   = rcpaf_get_field_data( 'country', $user_id );
 
-	return [ $address_1, $address_2, $city, $state, $country ];
+	return [ $address_1, $address_2, $city, $state, $postal, $country ];
 }
 
 /**
@@ -328,7 +333,8 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		'address_1',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
 
 	// Override available to set 'required' address fields
@@ -365,7 +371,8 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		'address_2',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
 
 	$fields_to_save = apply_filters( 'rcpaf_fields_to_save', $fields_to_save );
