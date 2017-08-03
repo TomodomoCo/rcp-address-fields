@@ -113,10 +113,11 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		$user_id = get_current_user_id();
 	}
 
-	$fields = rcpaf_get_all_fields_data( $user_id );
-
+	$fields 	 = rcpaf_get_all_fields_data( $user_id );
 	$is_frontend = ! is_admin() ? true : false;
 
+	// wrap address fields in unique `fieldset.rcp_address_fieldset`
+	echo '<fieldset class="rcp_address_fieldset">';
 	foreach ( $fields as $field ) {
 
 		// field type detection
@@ -156,6 +157,7 @@ function rcpaf_print_address_fields( $user_id = null ) {
 			}
 		}
 	}
+	echo '</fieldset>';
 }
 
 /**
