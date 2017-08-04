@@ -27,7 +27,8 @@ function rcpaf_required_fields_filter() {
 		'address_1',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
 
 	return $required_fields;
@@ -45,9 +46,10 @@ function rcpaf_fields_to_save_filter() {
 		'address_2',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
-	
+
 	return $fields_to_save;
 }
 // add_action( 'rcpaf_fields_to_save', 'rcpaf_fields_to_save_filter' );
@@ -134,6 +136,10 @@ function rcpaf_field_label_filter( $label, $field_slug ) {
 
 		case 'state':
 			return __( 'State/Province', 'rcp-address-fields' );
+			break;
+
+		case 'postal':
+			return __( 'Postal/ZIP Code', 'rcp-address-fields' );
 			break;
 
 		case 'country':

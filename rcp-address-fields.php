@@ -46,6 +46,10 @@ function rcpaf_get_field_label( $field_slug ) {
 			return __( 'State/Province', 'rcp-address-fields' );
 			break;
 
+		case 'postal':
+			return __( 'Postal/ZIP Code', 'rcp-address-fields' );
+			break;
+
 		case 'country':
 			return __( 'Country', 'rcp-address-fields' );
 			break;
@@ -93,9 +97,10 @@ function rcpaf_get_all_fields_data( $user_id = null ) {
 	$address_2 = rcpaf_get_field_data( 'address_2', $user_id );
 	$city      = rcpaf_get_field_data( 'city', $user_id );
 	$state     = rcpaf_get_field_data( 'state', $user_id );
+	$postal    = rcpaf_get_field_data( 'postal', $user_id );
 	$country   = rcpaf_get_field_data( 'country', $user_id );
 
-	return [ $address_1, $address_2, $city, $state, $country ];
+	return [ $address_1, $address_2, $city, $state, $postal, $country ];
 }
 
 /**
@@ -108,10 +113,11 @@ function rcpaf_print_address_fields( $user_id = null ) {
 		$user_id = get_current_user_id();
 	}
 
-	$fields = rcpaf_get_all_fields_data( $user_id );
-
+	$fields 	 = rcpaf_get_all_fields_data( $user_id );
 	$is_frontend = ! is_admin() ? true : false;
 
+	// wrap address fields in unique `fieldset.rcp_address_fieldset`
+	echo '<fieldset class="rcp_address_fieldset">';
 	foreach ( $fields as $field ) {
 
 		// field type detection
@@ -151,10 +157,28 @@ function rcpaf_print_address_fields( $user_id = null ) {
 			}
 		}
 	}
+	echo '</fieldset>';
 }
-add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );                   // admin ui
-add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );     // front-facing register
-add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );                // front-facing register > edit my profile
+
+/**
+ * Checks for user login status and maybe displays address fields for given context
+ */
+function rcpaf_maybe_display_address_fields() {
+
+	// Display on registration page if not logged in
+	if ( ! is_user_logged_in() ) {
+		add_action( 'rcp_before_subscription_form_fields', 'rcpaf_print_address_fields' );
+
+	} else {
+
+		// Admin UI
+		add_action( 'rcp_edit_member_after', 'rcpaf_print_address_fields' );
+
+		// Front-Facing register > edit my profile
+		add_action( 'rcp_profile_editor_after', 'rcpaf_print_address_fields' );
+	}
+}
+add_action( 'init', 'rcpaf_maybe_display_address_fields' );
 
 /**
  * Disables address field editing for users if data is already saved
@@ -192,9 +216,9 @@ function rcpaf_build_text_field( $field, $frontend = true, $print = true ) {
 
 		// disable field if flag enabled and field data already present
 		if ( $disable_editing !== false ) {
-			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" disabled class="disabled" value="%3$s"></p>';
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_%1$s">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" disabled class="disabled" value="%3$s"></p>';
 		} else {
-			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_profession">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
+			$template   = '<p id="rcp_%1$s_wrap"><label for="rcp_%1$s">%2$s</label><input name="rcp_%1$s" id="rcp_%1$s" type="%4$s" value="%3$s"></p>';
 		}
 		$field_html = sprintf( $template, $field['slug'], $field['label'], $field['data'], $field['type'] );
 
@@ -311,7 +335,8 @@ function rcpaf_validates_address_fields_on_register( $posted_data ) {
 		'address_1',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
 
 	// Override available to set 'required' address fields
@@ -348,7 +373,8 @@ function rcpaf_save_form_fields( $posted_data, $user_id = null ) {
 		'address_2',
 		'city',
 		'state',
-		'country'
+		'postal',
+		'country',
 	);
 
 	$fields_to_save = apply_filters( 'rcpaf_fields_to_save', $fields_to_save );
