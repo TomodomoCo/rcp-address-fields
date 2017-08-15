@@ -57,16 +57,6 @@ function rcpaf_get_field_label( $field_slug ) {
 }
 
 /**
- * Overrides the password confirmation field label
- *
- * @return string|void
- */
-function rcpaf_password_confirmation_label() {
-	echo __( 'Confirm Password', 'rcp-address-fields' );
-}
-add_filter( 'rcp_registration_password_again_label', 'rcpaf_password_confirmation_label' );
-
-/**
  * Fetches a field's label and any saved data for the current user
  *
  * @param string $field_slug
