@@ -3,7 +3,7 @@
 Plugin Name: RCP Address Fields
 Plugin URI: http://www.vanpattenmedia.com/
 Description: Adds address fields to user registration, edit, and admin interfaces.
-Version: 0.0.1
+Version: 1.0.0
 Text Domain: rcp-address-fields
 Domain Path: /languages
 Author: Van Patten Media Inc.
