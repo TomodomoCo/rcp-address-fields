@@ -420,7 +420,7 @@ add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
  * @return bool
  */
 function rcpaf_is_rcp_active() {
-	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) ) {
+	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) || ! class_exists( 'RCP_Member' ) ) {
 
 		// Display notice for RCP plugin requirement
 		add_action('admin_notices', 'rcpaf_notice_activate_rcp');
