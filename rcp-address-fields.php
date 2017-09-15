@@ -466,3 +466,31 @@ function rcpaf_include_address_in_export( $member ) {
 	return $member;
 }
 add_filter( 'rcp_export_members_get_data_row', 'rcpaf_include_address_in_export', 10, 1 );
+
+/**
+ * Merge custom column headers in CSV export to support Address Fields data
+ *
+ * @param array $cols
+ *
+ * @return array $cols
+ */
+function rcpaf_set_csv_export_columns( $cols ) {
+	$slugs = array(
+		'address_1',
+		'address_2',
+		'city',
+		'state',
+		'postal',
+		'country',
+	);
+
+	$additional_cols = array();
+	foreach ( $slugs as $slug ) {
+		$additional_cols[ $slug ] = rcpaf_get_field_label( $slug );
+	}
+
+	$cols = array_merge( $cols, $additional_cols );
+
+	return $cols;
+}
+add_filter( 'rcp_export_csv_cols_members', 'rcpaf_set_csv_export_columns', 10, 1 );
