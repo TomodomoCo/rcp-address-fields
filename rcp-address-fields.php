@@ -450,13 +450,14 @@ function rcpaf_include_address_in_export( $member ) {
 		'address_2' => rcpaf_get_field_data( 'address_2', $member['user_id'] ),
 		'city'      => rcpaf_get_field_data( 'city', $member['user_id'] ),
 		'state'     => rcpaf_get_field_data( 'state', $member['user_id'] ),
+		'postal'     => rcpaf_get_field_data( 'postal', $member['user_id'] ),
 		'country'   => rcpaf_get_field_data( 'country', $member['user_id'] )
 	);
 	
 	// Isolate data value for member
 	$address_data = array();
 	foreach ( $address_fields as $field ) {
-		$address_data[ $field['slug'] ] = $field['data'];
+		$address_data[ $field['slug'] ] = ( isset( $field['data'] ) ? $field['data'] : '' ); // default empty value for CSV
 	}
 
 	// Merge into existing member data row
