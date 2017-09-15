@@ -3,7 +3,7 @@
 Plugin Name: RCP Address Fields
 Plugin URI: http://www.vanpattenmedia.com/
 Description: Adds address fields to user registration, edit, and admin interfaces.
-Version: 0.0.1
+Version: 1.1.0
 Text Domain: rcp-address-fields
 Domain Path: /languages
 Author: Van Patten Media Inc.
@@ -420,7 +420,7 @@ add_action( 'rcp_edit_member', 'rcpaf_save_on_front_facing_submission', 10 );
  * @return bool
  */
 function rcpaf_is_rcp_active() {
-	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) ) {
+	if ( ! is_plugin_active( 'restrict-content-pro/restrict-content-pro.php' ) || ! class_exists( 'RCP_Member' ) ) {
 
 		// Display notice for RCP plugin requirement
 		add_action('admin_notices', 'rcpaf_notice_activate_rcp');
@@ -434,3 +434,65 @@ function rcpaf_is_rcp_active() {
 	return true;
 }
 add_action( 'admin_init', 'rcpaf_is_rcp_active' );
+
+/**
+ * Includes address field data in the member export
+ *
+ * @param array $member
+ *
+ * @return array $member
+ */
+function rcpaf_include_address_in_export( $member ) {
+
+	// Additional address fields data
+	$address_fields = array(
+		'address_1' => rcpaf_get_field_data( 'address_1', $member['user_id'] ),
+		'address_2' => rcpaf_get_field_data( 'address_2', $member['user_id'] ),
+		'city'      => rcpaf_get_field_data( 'city', $member['user_id'] ),
+		'state'     => rcpaf_get_field_data( 'state', $member['user_id'] ),
+		'postal'    => rcpaf_get_field_data( 'postal', $member['user_id'] ),
+		'country'   => rcpaf_get_field_data( 'country', $member['user_id'] )
+	);
+	
+	// Isolate data value for member
+	$address_data = array();
+	foreach ( $address_fields as $field ) {
+		$address_data[ $field['slug'] ] = ( isset( $field['data'] ) ? $field['data'] : '' ); // default empty value for CSV
+	}
+
+	// Merge into existing member data row
+	$member = array_merge( $member, $address_data );
+
+	return $member;
+}
+add_filter( 'rcp_export_members_get_data_row', 'rcpaf_include_address_in_export', 10, 1 );
+
+/**
+ * Merge custom column headers in CSV export to support Address Fields data
+ *
+ * @param array $cols
+ *
+ * @return array $cols
+ */
+function rcpaf_set_csv_export_columns( $cols ) {
+	$slugs = array(
+		'address_1',
+		'address_2',
+		'city',
+		'state',
+		'postal',
+		'country',
+	);
+
+	// Use field label data to populate CSV header columns
+	$additional_cols = array();
+	foreach ( $slugs as $slug ) {
+		$additional_cols[ $slug ] = rcpaf_get_field_label( $slug );
+	}
+
+	// Merge custom columns with existing columns
+	$cols = array_merge( $cols, $additional_cols );
+
+	return $cols;
+}
+add_filter( 'rcp_export_csv_cols_members', 'rcpaf_set_csv_export_columns', 10, 1 );
