@@ -450,7 +450,7 @@ function rcpaf_include_address_in_export( $member ) {
 		'address_2' => rcpaf_get_field_data( 'address_2', $member['user_id'] ),
 		'city'      => rcpaf_get_field_data( 'city', $member['user_id'] ),
 		'state'     => rcpaf_get_field_data( 'state', $member['user_id'] ),
-		'postal'     => rcpaf_get_field_data( 'postal', $member['user_id'] ),
+		'postal'    => rcpaf_get_field_data( 'postal', $member['user_id'] ),
 		'country'   => rcpaf_get_field_data( 'country', $member['user_id'] )
 	);
 	
@@ -484,11 +484,13 @@ function rcpaf_set_csv_export_columns( $cols ) {
 		'country',
 	);
 
+	// Use field label data to populate CSV header columns
 	$additional_cols = array();
 	foreach ( $slugs as $slug ) {
 		$additional_cols[ $slug ] = rcpaf_get_field_label( $slug );
 	}
 
+	// Merge custom columns with existing columns
 	$cols = array_merge( $cols, $additional_cols );
 
 	return $cols;
