@@ -434,3 +434,34 @@ function rcpaf_is_rcp_active() {
 	return true;
 }
 add_action( 'admin_init', 'rcpaf_is_rcp_active' );
+
+/**
+ * Includes address field data in the member export
+ *
+ * @param array $member
+ *
+ * @return array $member
+ */
+function rcpaf_include_address_in_export( $member ) {
+
+	// Additional address fields data
+	$address_fields = array(
+		'address_1' => rcpaf_get_field_data( 'address_1', $member['user_id'] ),
+		'address_2' => rcpaf_get_field_data( 'address_2', $member['user_id'] ),
+		'city'      => rcpaf_get_field_data( 'city', $member['user_id'] ),
+		'state'     => rcpaf_get_field_data( 'state', $member['user_id'] ),
+		'country'   => rcpaf_get_field_data( 'country', $member['user_id'] )
+	);
+	
+	// Isolate data value for member
+	$address_data = array();
+	foreach ( $address_fields as $field ) {
+		$address_data[ $field['slug'] ] = $field['data'];
+	}
+
+	// Merge into existing member data row
+	$member = array_merge( $member, $address_data );
+
+	return $member;
+}
+add_filter( 'rcp_export_members_get_data_row', 'rcpaf_include_address_in_export', 10, 1 );
